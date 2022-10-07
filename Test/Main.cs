@@ -14,17 +14,18 @@ namespace Test
 
         // Если True, сохраняет запросы и ответы в файлах в формате .json
         static bool JSONout = false;
-        static dynamic LatestFiles;
+        static LatestFiles LatestDownloads;
+        static Config config = GetConfig();
 
         // Путь, куда программа будет сохранять все временные файлы
-        const string TEMP_PATH = @"C:\RosFinMonitoring";
+        static readonly string TEMP_PATH = config.TempPath;
         // Путь, куда программа будет сохранять распакованные и готовые xml файлы
-        const string OUT_PATH = @"C:\RosFinMonitoring\XMLout";
+        static readonly string OUT_PATH = config.XMLOutPath;
 
-        const string LOGIN = "логин_пользователя";
-        const string PASSWORD = "пароль_пользователя";
+        static readonly string LOGIN = config.Login;
+        static readonly string PASSWORD = config.Password;
         // Отпечаток сертификата
-        const string CERT_THUMBPRINT = "отпечаток_сертификата";
+        static readonly string CERT_THUMBPRINT = config.CertThumbprint;
 
         static void Main(string[] args)
         {
@@ -86,9 +87,9 @@ namespace Test
                 return;
             }
 
-            if (te2Id != null) await GetFileFromID("current-te2-file", te2Id, cert, token, NewTe2Date, (DateTime)LatestFiles.te2);
-            if (mvkId != null) await GetFileFromID("current-mvk-file-zip", mvkId, cert, token, NewMvkDate, (DateTime)LatestFiles.mvk);
-            if (omuId != null) await GetFileFromID("current-omu-file-zip", omuId, cert, token, NewOmuDate, (DateTime)LatestFiles.omu);
+            if (te2Id != null) await GetFileFromID("current-te2-file", te2Id, cert, token, NewTe2Date, LFtype.te2);
+            if (mvkId != null) await GetFileFromID("mvk-catalog-file", mvkId, cert, token, NewMvkDate, LFtype.mvk);
+            if (omuId != null) await GetFileFromID("omu-catalog-file", omuId, cert, token, NewOmuDate, LFtype.omu);
 
             Console.WriteLine("\nПрограмма завершила свою работу!");
             Console.WriteLine("Конец выполнения программы: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));

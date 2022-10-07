@@ -8,6 +8,33 @@ using System.Threading.Tasks;
 
 namespace Test
 {
+    class LatestFiles
+    {
+        public string te2 = null;
+        public string mvk = null;
+        public string omu = null;
+
+        public LatestFiles() { }
+
+        public static LatestFiles Parse(dynamic obj)
+        {
+            var files = new LatestFiles();
+
+            files.te2 = obj?.te2;
+            files.mvk = obj?.mvk;
+            files.omu = obj?.omu;
+
+            return files;
+        }
+    }
+
+    enum LFtype
+    {
+        te2,
+        mvk,
+        omu
+    }
+
     partial class Program
     {
         static void GetFilesDate()
@@ -18,7 +45,7 @@ namespace Test
                 StreamReader sr = new StreamReader($"{TEMP_PATH}\\FilesDate.json");
 
                 // Если он есть и открылся, считываем из него данные
-                LatestFiles = JsonConvert.DeserializeObject(sr.ReadToEnd());
+                LatestDownloads = LatestFiles.Parse(JsonConvert.DeserializeObject(sr.ReadToEnd()));
 
                 sr.Close();
             }

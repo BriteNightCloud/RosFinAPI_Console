@@ -54,6 +54,7 @@
     <Compile Include="Auth.cs" />
     <Compile Include="Catalog.cs" />
     <Compile Include="Cert.cs" />
+    <Compile Include="ConfigFile.cs" />
     <Compile Include="File.cs" />
     <Compile Include="LatestFiles.cs" />
     <Compile Include="Main.cs" />

@@ -16,9 +16,19 @@ namespace Test
 {
     partial class Program
     {
-        static async Task GetFileFromID(string fileName, string fileId, X509Certificate2 cert, string token, DateTime NewDate, DateTime OldDate)
+        static async Task GetFileFromID(string fileName, string fileId, X509Certificate2 cert, string token, DateTime NewDate, LFtype type)
         {
             Console.WriteLine();
+            DateTime OldDate;
+
+            if (type == LFtype.te2)
+                OldDate = DateTime.Parse(LatestDownloads.te2);
+            else if (type == LFtype.mvk)
+                OldDate = DateTime.Parse(LatestDownloads.mvk);
+            else if (type == LFtype.omu)
+                OldDate = DateTime.Parse(LatestDownloads.omu);
+            else
+                throw new Exception("LFtype не распознана в методе GetFileFromID!");
 
             if (NewDate <= OldDate && Directory.Exists($"{OUT_PATH}\\{fileName}") && Directory.EnumerateFiles($"{OUT_PATH}\\{fileName}", "*.*", SearchOption.AllDirectories).Count() != 0)
             {
@@ -28,6 +38,8 @@ namespace Test
 
             if (Directory.Exists($"{OUT_PATH}\\{fileName}"))
                 Directory.Delete($"{OUT_PATH}\\{fileName}", true);
+
+            Directory.CreateDirectory($"{OUT_PATH}\\{fileName}");
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -70,12 +82,38 @@ namespace Test
 
                 Console.WriteLine("Файл \n" + fileName + "\" успешно загружен и распакован по пути: \n" + $"{OUT_PATH}\\{fileName}");
 
-                LatestFiles.te2 = NewDate;
+                if (type == LFtype.te2)
+                    LatestDownloads.te2 = NewDate.ToString();
+                else if (type == LFtype.mvk)
+                    LatestDownloads.mvk = NewDate.ToString();
+                else if (type == LFtype.omu)
+                    LatestDownloads.omu = NewDate.ToString();
 
                 StreamWriter sw = new StreamWriter($"{TEMP_PATH}\\FilesDate.json");
 
                 // Записываем шаблонные данные в файл
-                sw.Write(JsonConvert.SerializeObject(LatestFiles, Formatting.Indented));
+                sw.Write(JsonConvert.SerializeObject(LatestDownloads, Formatting.Indented));
+                sw.Close();
+
+                File.Delete(zipName);
+            }
+            catch (InvalidDataException ex)
+            {
+                File.Copy(zipName, $"{OUT_PATH}\\{fileName}\\{NewDate.ToString("dd.MM.yyyy - новый")}.xml", true);
+
+                Console.WriteLine("Файл \n" + fileName + "\" успешно загружен и перемещен по пути: \n" + $"{OUT_PATH}\\{fileName}");
+
+                if (type == LFtype.te2)
+                    LatestDownloads.te2 = NewDate.ToString();
+                else if (type == LFtype.mvk)
+                    LatestDownloads.mvk = NewDate.ToString();
+                else if (type == LFtype.omu)
+                    LatestDownloads.omu = NewDate.ToString();
+
+                StreamWriter sw = new StreamWriter($"{TEMP_PATH}\\FilesDate.json");
+
+                // Записываем шаблонные данные в файл
+                sw.Write(JsonConvert.SerializeObject(LatestDownloads, Formatting.Indented));
                 sw.Close();
 
                 File.Delete(zipName);
