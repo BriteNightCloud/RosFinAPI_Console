@@ -36,10 +36,8 @@ namespace Test
                 return;
             }
 
-            if (Directory.Exists($"{OUT_PATH}\\{fileName}"))
-                Directory.Delete($"{OUT_PATH}\\{fileName}", true);
-
-            Directory.CreateDirectory($"{OUT_PATH}\\{fileName}");
+            if (!Directory.Exists($"{OUT_PATH}\\{fileName}"))
+                Directory.CreateDirectory($"{OUT_PATH}\\{fileName}");
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
