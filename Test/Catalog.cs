@@ -40,7 +40,7 @@ namespace Test
                 if (JSONout)
                 {
                     StreamWriter sw = new StreamWriter(TEMP_PATH + $"\\{catalogName}-{response.LastModified.ToString("dd.MM.yyyy HH-mm")}.json");
-                    sw.Write(JsonConvert.SerializeObject(resp, Formatting.Indented));
+                    sw.Write(JsonConvert.SerializeObject(resp, Newtonsoft.Json.Formatting.Indented));
                     sw.Close();
                 }
 

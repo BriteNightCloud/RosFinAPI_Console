@@ -63,7 +63,7 @@ namespace Test
                 StreamWriter sw = new StreamWriter($"{TEMP_PATH}\\FilesDate.json");
 
                 // Записываем шаблонные данные в файл
-                sw.Write(JsonConvert.SerializeObject(defaultCfg, Formatting.Indented));
+                sw.Write(JsonConvert.SerializeObject(defaultCfg, Newtonsoft.Json.Formatting.Indented));
                 sw.Close();
 
                 GetFilesDate();

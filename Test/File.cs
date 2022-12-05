@@ -11,11 +11,27 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO.Compression;
+using System.Xml;
+using System.Globalization;
+using System.Reflection;
 
 namespace Test
 {
     partial class Program
     {
+        class Uploads
+        {
+            public Uploads() { }
+
+            public string LastUpload = "";
+            public static Uploads Parse(dynamic obj)
+            {
+                Uploads upload = new Uploads();
+                upload.LastUpload = obj?.LastUpload;
+                return upload;
+            }
+        }
+
         static async Task GetFileFromID(string fileName, string fileId, X509Certificate2 cert, string token, DateTime NewDate, LFtype type)
         {
             Console.WriteLine();
@@ -30,9 +46,29 @@ namespace Test
             else
                 throw new Exception("LFtype не распознана в методе GetFileFromID!");
 
-            if (NewDate <= OldDate && Directory.Exists($"{OUT_PATH}\\{fileName}") && Directory.EnumerateFiles($"{OUT_PATH}\\{fileName}", "*.*", SearchOption.AllDirectories).Count() != 0)
+            string LastUpload = "0001-01-01";
+            try
             {
-                Console.WriteLine("Файл \"" + fileName + "\" уже является актуальным.");
+                // Проверяем наличие файла и открываем его для чтения
+                StreamReader sr = new StreamReader($"{OUT_PATH}\\{fileName}\\LastUpload.json");
+
+                // Если он есть и открылся, считываем из него данные
+                var tmp = Uploads.Parse(JsonConvert.DeserializeObject(sr.ReadToEnd()));
+
+                LastUpload = tmp.LastUpload;
+
+                sr.Close();
+            }
+            catch (Exception ex) { }
+
+            if (NewDate <= OldDate && Directory.Exists($"{OUT_PATH}\\{fileName}") && Directory.EnumerateFiles($"{OUT_PATH}\\{fileName}", "*.xml", SearchOption.AllDirectories).Count() != 0)
+            {
+                Console.WriteLine("Файл \"" + fileName + "\" уже загружен и является актуальным.");
+                return;
+            }
+            else if (DateTime.ParseExact(LastUpload, "yyyy-MM-dd", CultureInfo.InvariantCulture) == NewDate)
+            {
+                Console.WriteLine("Файл \"" + fileName + "\" уже был загружен в 1С, нет смысла скачивать его снова.");
                 return;
             }
 
@@ -56,7 +92,7 @@ namespace Test
             if (JSONout)
             {
                 StreamWriter sw = new StreamWriter(TEMP_PATH + $"\\{fileName}-{DateTime.Now.ToString("dd.MM.yyyy HH-mm")}.json");
-                sw.Write(JsonConvert.SerializeObject(vars, Formatting.Indented));
+                sw.Write(JsonConvert.SerializeObject(vars, Newtonsoft.Json.Formatting.Indented));
                 sw.Close();
             }
 
@@ -78,7 +114,7 @@ namespace Test
 
                 ZipFile.ExtractToDirectory(zipName, $"{OUT_PATH}\\{fileName}", Encoding.GetEncoding(866));
 
-                Console.WriteLine("Файл \n" + fileName + "\" успешно загружен и распакован по пути: \n" + $"{OUT_PATH}\\{fileName}");
+                Console.WriteLine("Файл \"" + fileName + "\" успешно загружен и распакован по пути: \n" + $"{OUT_PATH}\\{fileName}");
 
                 if (type == LFtype.te2)
                     LatestDownloads.te2 = NewDate.ToString();
@@ -90,7 +126,7 @@ namespace Test
                 StreamWriter sw = new StreamWriter($"{TEMP_PATH}\\FilesDate.json");
 
                 // Записываем шаблонные данные в файл
-                sw.Write(JsonConvert.SerializeObject(LatestDownloads, Formatting.Indented));
+                sw.Write(JsonConvert.SerializeObject(LatestDownloads, Newtonsoft.Json.Formatting.Indented));
                 sw.Close();
 
                 File.Delete(zipName);
@@ -99,7 +135,7 @@ namespace Test
             {
                 File.Copy(zipName, $"{OUT_PATH}\\{fileName}\\{NewDate.ToString("dd.MM.yyyy - новый")}.xml", true);
 
-                Console.WriteLine("Файл \n" + fileName + "\" успешно загружен и перемещен по пути: \n" + $"{OUT_PATH}\\{fileName}");
+                Console.WriteLine("Файл \"" + fileName + "\" успешно загружен и перемещен по пути: \n" + $"{OUT_PATH}\\{fileName}");
 
                 if (type == LFtype.te2)
                     LatestDownloads.te2 = NewDate.ToString();
@@ -111,7 +147,7 @@ namespace Test
                 StreamWriter sw = new StreamWriter($"{TEMP_PATH}\\FilesDate.json");
 
                 // Записываем шаблонные данные в файл
-                sw.Write(JsonConvert.SerializeObject(LatestDownloads, Formatting.Indented));
+                sw.Write(JsonConvert.SerializeObject(LatestDownloads, Newtonsoft.Json.Formatting.Indented));
                 sw.Close();
 
                 File.Delete(zipName);

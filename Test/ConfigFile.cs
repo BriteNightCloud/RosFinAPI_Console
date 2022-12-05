@@ -59,7 +59,7 @@ namespace Test
                 StreamWriter sw = new StreamWriter($"{Assembly.GetExecutingAssembly().Location}\\..\\config.json");
 
                 // Записываем шаблонные данные в файл
-                sw.Write(JsonConvert.SerializeObject(defaultCfg, Formatting.Indented));
+                sw.Write(JsonConvert.SerializeObject(defaultCfg, Newtonsoft.Json.Formatting.Indented));
                 sw.Close();
 
                 Console.WriteLine("Был создан новый файл config.json, т.к. не удалось обнаружить предыдущий!");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -36,6 +37,13 @@ namespace Test
                 Directory.CreateDirectory(TEMP_PATH);
                 Directory.CreateDirectory($"{TEMP_PATH}\\logs");
                 Directory.CreateDirectory(OUT_PATH);
+            }
+
+            if (Directory.Exists($"{TEMP_PATH}\\logs\\") && Directory.EnumerateFiles($"{TEMP_PATH}\\logs", "*.txt", SearchOption.TopDirectoryOnly).Count() >= 30)
+            {
+                var filesByAge = new DirectoryInfo($"{TEMP_PATH}\\logs").GetFiles().OrderBy(f => f.LastWriteTime);
+                for (int i = 0; i <= filesByAge.Count() - 30; i++)
+                    File.Delete($"{TEMP_PATH}\\logs\\"+ filesByAge.ElementAt(i).ToString());
             }
 
             var LogFile = File.Open($"{TEMP_PATH}\\logs\\{DateTime.Now.ToString("dd.MM.yyyy HH-mm-ss")}.txt", FileMode.Create);
